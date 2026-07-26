@@ -187,15 +187,29 @@ like the other detail controls.
 
 ## Order of work
 
-1. Extract min/max/default from `source.xlsx` in the generator; add the `DeviceParameter`
-   and `DeviceEqConfiguration` types.
-2. `int2Data` / `data2Int` converters + unit tests. _(Encoding already confirmed from the
-   device TODO, so no hardware round-trip needed first.)_
-3. 01v96 mapping table + `deviceConfig.parameters` / `eq`; verify round-trip in the debug
-   log against the console.
-4. `sync-entry` plumbing.
-5. EQ tab with plain faders — usable from here on.
-6. Curve display, drag handles, attenuator.
+1. ✅ Q and frequency value tables generated from `source.xlsx`
+   (`generate-eq-tables.ts` -> `eq-tables.ts`); `DeviceParameter` and
+   `DeviceEqConfiguration` types added.
+2. ✅ `int2Data` / `data2Int` converters + unit tests. The encoding was already
+   confirmed in the device TODO, so no hardware round-trip was needed first.
+3. ✅ 01v96 mapping table + `deviceConfig.parameters` / `eq`, including the
+   attenuator. Message bytes covered by `test/eq-mapping.test.ts`.
+   **Still to verify against the real console.**
+4. ✅ `sync-entry` plumbing, backend and frontend.
+5. ✅ EQ tab with plain faders. Verified end to end against the dummy device,
+   which now has an EQ of its own.
+6. ⬜ Curve display, drag handles.
+
+### Verifying against the console
+
+Everything below the wire format is covered by tests, but no message has been
+sent to real hardware yet. With `device: 'yamaha-01v96'` and `logLevel: 'debug'`
+in the local config, open a channel's EQ tab and check that
+
+- the values in the tab match the console's EQ page after `sync-entry`,
+- moving a fader moves the matching parameter on the console,
+- turning a knob on the console updates the tab,
+- a gain of exactly -18.0dB logs `7f 7f 7e 4c` as its data bytes.
 
 ## Follow-ups (out of scope for the first pass)
 
