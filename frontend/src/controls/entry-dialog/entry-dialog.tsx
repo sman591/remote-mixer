@@ -17,6 +17,7 @@ import { Icon } from '../../ui/icons/icon'
 import { iconColor } from '../../ui/icons'
 
 import { EntryDialogFaders } from './entry-dialog-faders'
+import { EntryDialogEq } from './entry-dialog-eq'
 import { showColorDialog } from './color-dialog'
 
 const container = css`
@@ -92,11 +93,15 @@ export function EntryDialog({ category, id }: EntryDialogProps) {
             label: 'Faders',
             content: <EntryDialogFaders category={category} id={id} />,
           },
-          // {
-          //   id: 'eq',
-          //   label: 'EQ',
-          //   content: 'EQ',
-          // },
+          ...(categoryInfo.eq
+            ? [
+                {
+                  id: 'eq',
+                  label: categoryInfo.eq.label,
+                  content: <EntryDialogEq category={category} id={id} />,
+                },
+              ]
+            : []),
           // {
           //   id: 'effects',
           //   label: 'EFFECTS',
