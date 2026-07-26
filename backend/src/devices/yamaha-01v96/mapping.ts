@@ -7,8 +7,18 @@ import {
   DataConverter,
   fader2Data,
   faderConverter,
+  intConverter,
   onConverter,
 } from './converters'
+import {
+  attenuatorCategoryByElement,
+  attenuatorElementByCategory,
+  attenuatorProperty,
+  eqCategoryByElement,
+  eqElementByCategory,
+  eqMappingByProperty,
+  eqPropertyByParameterName,
+} from './eq'
 import { MidiMessage, MidiMessageArgs } from './message'
 import { bytesByMessageType } from './message-types'
 import { changeName, handleNameMessage } from './names'
@@ -159,7 +169,7 @@ export const messageMapping: MessageMapping[] = [
     },
 
     outgoing: (category, id, property, value) => {
-      if (category !== 'ch' && !property.startsWith('aux')) return null
+      if (category !== 'ch' || !property.startsWith('aux')) return null
 
       const aux = property.slice(3)
       const type = `kInputAUX/kAUX${aux}Level`
@@ -170,6 +180,74 @@ export const messageMapping: MessageMapping[] = [
         type,
         channel: parseInt(id) - 1,
         data: value !== undefined ? fader2Data(value) : undefined,
+      }
+    },
+  },
+
+  // EQ
+  {
+    incoming: message => {
+      if (!message.type || !message.data) return null
+      const match = message.type.match(/^(\w+)\/kEQ(\w+)$/)
+      if (!match) return null
+
+      const category = eqCategoryByElement.get(match[1])
+      const property = eqPropertyByParameterName.get(match[2])
+      const mapping = property && eqMappingByProperty.get(property)
+      if (!category || !property || !mapping) return null
+
+      return {
+        type: 'change',
+        category,
+        id: String(message.channel + 1),
+        property,
+        value: mapping.converter.incoming(message.data),
+      }
+    },
+
+    outgoing: (category, id, property, value) => {
+      const element = eqElementByCategory[category]
+      const mapping = eqMappingByProperty.get(property)
+      if (!element || !mapping) return null
+
+      return {
+        type: `${element}/kEQ${mapping.name}`,
+        channel: parseInt(id) - 1,
+        data:
+          value !== undefined ? mapping.converter.outgoing(value) : undefined,
+      }
+    },
+  },
+
+  // attenuator
+  {
+    incoming: message => {
+      if (!message.type || !message.data) return null
+      const match = message.type.match(/^(\w+)\/kAtt$/)
+      if (!match) return null
+
+      const category = attenuatorCategoryByElement.get(match[1])
+      if (!category) return null
+
+      return {
+        type: 'change',
+        category,
+        id: String(message.channel + 1),
+        property: attenuatorProperty,
+        value: intConverter.incoming(message.data),
+      }
+    },
+
+    outgoing: (category, id, property, value) => {
+      if (property !== attenuatorProperty) return null
+
+      const element = attenuatorElementByCategory[category]
+      if (!element) return null
+
+      return {
+        type: `${element}/kAtt`,
+        channel: parseInt(id) - 1,
+        data: value !== undefined ? intConverter.outgoing(value) : undefined,
       }
     },
   },

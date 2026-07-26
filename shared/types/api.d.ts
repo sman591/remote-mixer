@@ -7,6 +7,12 @@ export interface ApiSyncDeviceMessage {
   type: 'sync-device'
 }
 
+export interface ApiSyncEntryMessage {
+  type: 'sync-entry'
+  category: string
+  id: string
+}
+
 export interface ApiChangeMessage {
   type: 'change'
   category: string
@@ -32,7 +38,10 @@ export interface ApiHeartBeatMessage {
   type: 'heartbeat'
 }
 
-export type ApiInMessage = ApiChangeMessage | ApiSyncDeviceMessage
+export type ApiInMessage =
+  | ApiChangeMessage
+  | ApiSyncDeviceMessage
+  | ApiSyncEntryMessage
 export type ApiOutMessage =
   | ApiHeartBeatMessage
   | ApiSyncMessage

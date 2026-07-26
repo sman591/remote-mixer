@@ -25,6 +25,10 @@ export function handleApiMessage(message: ApiInMessage, source: ws): void {
       deviceController.sync?.()
       break
 
+    case 'sync-entry':
+      deviceController.syncEntry?.(message.category, message.id)
+      break
+
     default:
       assertNever(message)
   }

@@ -14,6 +14,25 @@ export function data2Fader(data: DataBytes): number {
 }
 
 /**
+ * Integers are transmitted in 4 bytes of 7 bits each, most significant first,
+ * negative values as a 28bit two's complement
+ * (channel EQ gain: -180 == 7f 7f 7e 4c, +180 == 00 00 01 34)
+ */
+const intBits = 28
+const intRange = 2 ** intBits
+
+export function int2Data(value: unknown): DataBytes {
+  if (typeof value !== 'number') return [0, 0, 0, 0]
+  const raw = value < 0 ? value + intRange : value
+  return [(raw >> 21) & 0x7f, (raw >> 14) & 0x7f, (raw >> 7) & 0x7f, raw & 0x7f]
+}
+
+export function data2Int(data: DataBytes): number {
+  const raw = (data[0] << 21) + (data[1] << 14) + (data[2] << 7) + data[3]
+  return raw >= intRange / 2 ? raw - intRange : raw
+}
+
+/**
  * channel on values: last byte 1/0
  */
 export function on2Data(on: unknown): DataBytes {
@@ -55,4 +74,9 @@ export const faderConverter: DataConverter = {
 export const onConverter: DataConverter = {
   incoming: data2On,
   outgoing: on2Data,
+}
+
+export const intConverter: DataConverter = {
+  incoming: data2Int,
+  outgoing: int2Data,
 }

@@ -9,7 +9,7 @@ import {
   getMeterReqest,
   interpretIncomingMessage,
 } from './protocol'
-import { sync } from './sync'
+import { sync, syncEntry } from './sync'
 import { formatMessage } from './message'
 import { refreshDependentChannels } from './pairs-groups'
 
@@ -64,5 +64,10 @@ export default class Yamaha01v96DeviceController implements DeviceController {
   sync(): void {
     logger.debug('==> synchronizing...')
     sync()
+  }
+
+  syncEntry(category: string, id: string): void {
+    logger.debug(`==> synchronizing ${category} ${id}...`)
+    syncEntry(category, id)
   }
 }

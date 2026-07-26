@@ -17,7 +17,7 @@ export function sendApiMessage(message: ApiInMessage) {
 
   // we keep the UI more responsive by applying the new state straight away
   // instead of waiting for the response
-  if (message.type !== 'sync-device') handleApiMessage(message)
+  if (message.type === 'change') handleApiMessage(message)
 }
 
 export function ApiWrapper({ children }: { children: JSX.Element }) {

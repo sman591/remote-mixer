@@ -1,6 +1,8 @@
 import { DeviceConfiguration } from '@remote-mixer/types'
 import { arrayRange } from '@remote-mixer/utils'
 
+import { eqConfiguration, eqParameters } from './eq'
+
 export const deviceConfig: DeviceConfiguration = {
   categories: [
     {
@@ -14,6 +16,8 @@ export const deviceConfig: DeviceConfiguration = {
         ...arrayRange(1, 8, it => ({ key: 'aux' + it, label: 'AUX' + it })),
       ],
       additionalProperties: ['on'],
+      parameters: eqParameters,
+      eq: eqConfiguration,
       modes: ['full', 'iem'],
     },
     {
@@ -22,6 +26,8 @@ export const deviceConfig: DeviceConfiguration = {
       count: 8,
       namePrefix: 'AUX',
       additionalProperties: ['on'],
+      parameters: eqParameters,
+      eq: eqConfiguration,
       modes: ['full'],
     },
     {
@@ -30,6 +36,8 @@ export const deviceConfig: DeviceConfiguration = {
       count: 8,
       namePrefix: 'BUS',
       additionalProperties: ['on'],
+      parameters: eqParameters,
+      eq: eqConfiguration,
       modes: ['full'],
     },
     {
@@ -38,6 +46,8 @@ export const deviceConfig: DeviceConfiguration = {
       count: 1,
       namePrefix: 'SUM',
       additionalProperties: ['on'],
+      parameters: eqParameters,
+      eq: eqConfiguration,
       modes: ['full'],
     },
   ],
