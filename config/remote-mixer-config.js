@@ -5,8 +5,8 @@
 /** @type {Partial<import('../backend/src/services/config').RemoteMixerConfiguration>} */
 const userConfig = {
   // httpPort: 8080,
-  // logLevel: 'debug',
-  // device: 'dummy',
+  logLevel: 'debug',
+  device: 'yamaha-01v96',
   
   // Mode for the mixer interface:
   // - 'iem': In-Ear Monitor mode - shows simplified controls for monitor mixing
