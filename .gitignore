@@ -179,3 +179,6 @@ dist
 !.yarn/releases
 !.yarn/sdks
 !.yarn/versions
+
+# machine-specific configuration
+config/remote-mixer-config.local.js

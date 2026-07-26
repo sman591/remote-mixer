@@ -91,6 +91,26 @@ const userConfig = {
 module.exports = userConfig
 ```
 
+### Machine-specific configuration
+
+`config/remote-mixer-config.js` is tracked in git, so editing it directly puts your local setup into version control and causes conflicts when you pull.
+
+For anything specific to one machine or venue — which console is connected, its IP address, the log level you debug with — create a `config/remote-mixer-config.local.js` instead. It is gitignored, and its values are merged over the tracked file:
+
+```js
+/** @type {Partial<import('../backend/src/services/config').RemoteMixerConfiguration>} */
+const localConfig = {
+  device: {
+    type: 'behringer-x32',
+    options: { remoteAddress: '192.168.2.7' },
+  },
+}
+
+module.exports = localConfig
+```
+
+The merge is shallow, so a `device` defined here replaces the tracked one entirely rather than merging its `options`.
+
 ## Development
 
 Start in development mode with hot reloading:

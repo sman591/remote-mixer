@@ -1,3 +1,4 @@
+import { existsSync } from 'fs'
 import { join } from 'path'
 
 import { RemoteMixerMode } from '@remote-mixer/types'
@@ -29,10 +30,25 @@ export interface RemoteMixerConfiguration {
 
 export const configDirectoryPath = join(__dirname, '../../../config')
 
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const userConfig: Partial<RemoteMixerConfiguration> = require(
-  join(configDirectoryPath, 'remote-mixer-config')
-)
+function loadConfigFile(name: string): Partial<RemoteMixerConfiguration> {
+  const path = join(configDirectoryPath, name)
+  if (!existsSync(`${path}.js`)) return {}
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  return require(path)
+}
+
+/**
+ * The tracked `remote-mixer-config.js` holds defaults shared by everyone,
+ * `remote-mixer-config.local.js` is gitignored and holds machine-specific
+ * overrides (which device is connected, its IP address, ...).
+ *
+ * Note this is a shallow merge: a local `device` replaces the tracked one
+ * entirely instead of merging its `options`.
+ */
+const userConfig: Partial<RemoteMixerConfiguration> = {
+  ...loadConfigFile('remote-mixer-config'),
+  ...loadConfigFile('remote-mixer-config.local'),
+}
 
 function c<T extends keyof RemoteMixerConfiguration>(
   key: T,

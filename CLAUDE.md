@@ -31,7 +31,7 @@ Runs the backend (port 8000) plus the webpack dev server (port 8001, opens a bro
 
 Note `yarn build` runs `yarn clean` first, which wipes `dist` and the Linaria/eslint caches — a full rebuild takes a while. Tests currently only exist in `shared/utils/test`.
 
-Runtime config lives in `config/remote-mixer-config.js`, which is tracked in git — this fork commits its own setup (`yamaha-01v96`, debug logging). It sets `device`, `mode`, `httpPort`, `logLevel`; defaults are in [backend/src/services/config.ts](backend/src/services/config.ts). `device: 'dummy'` emits random changes and meters, so the whole stack runs without hardware.
+Runtime config sets `device`, `mode`, `httpPort`, `logLevel`; defaults live in [backend/src/services/config.ts](backend/src/services/config.ts). Two files layer, shallow-merged: the tracked `config/remote-mixer-config.js`, then the gitignored `config/remote-mixer-config.local.js` for machine-specific settings. Never put a device IP or local override in the tracked file. `device: 'dummy'` emits random changes and meters, so the whole stack runs without hardware.
 
 ## Architecture
 
