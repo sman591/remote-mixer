@@ -13,6 +13,8 @@ import { baseline } from '../../ui/styles'
 import { getParameter, rendersAsButton } from '../../util/parameter'
 import { ParameterControl } from '../parameter-control'
 
+import { EqCurve } from './eq-curve'
+
 const header = css`
   display: flex;
   align-items: center;
@@ -93,6 +95,7 @@ export function EntryDialogEq({ category, id }: EntryDialogEqProps) {
         {controlByKey(eq.on)}
         {extraParameters.filter(rendersAsButton).map(control)}
       </div>
+      <EqCurve category={categoryInfo} eq={eq} state={state} />
       <EntryContainer noWrap>
         {extraParameters
           .filter(parameter => !rendersAsButton(parameter))

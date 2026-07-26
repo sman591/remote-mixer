@@ -62,16 +62,19 @@ function formatQ(q: number): string {
   return q.toFixed(q >= 1 ? 1 : 2)
 }
 
-const qFilterLabels: Record<string, string> = {
-  'Low Shelving': 'L.SHELF',
-  'High Shelving': 'H.SHELF',
-  LPF: 'LPF',
-  HPF: 'HPF',
+/** the Q values that select a filter instead of a bandwidth */
+const qFilters: Record<string, { label: string; filter: string }> = {
+  'Low Shelving': { label: 'L.SHELF', filter: 'lowShelf' },
+  'High Shelving': { label: 'H.SHELF', filter: 'highShelf' },
+  LPF: { label: 'LPF', filter: 'lowPass' },
+  HPF: { label: 'HPF', filter: 'highPass' },
 }
 
 function qOption({ value, data }: TableEntry): string {
-  const filterLabel = qFilterLabels[data]
-  if (filterLabel) return `{ value: ${value}, label: '${filterLabel}' }`
+  const filter = qFilters[data]
+  if (filter) {
+    return `{ value: ${value}, label: '${filter.label}', filter: '${filter.filter}' }`
+  }
 
   const q = parseFloat(data)
   return `{ value: ${value}, label: '${formatQ(q)}', number: ${q} }`

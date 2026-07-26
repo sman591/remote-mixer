@@ -3,18 +3,59 @@ import {
   DeviceConfiguration,
   DeviceController,
   DeviceEqConfiguration,
+  DeviceEqFilterType,
   DeviceMessageListener,
   DeviceMetersMessage,
   DeviceParameter,
 } from '@remote-mixer/types'
 import { logger } from '@remote-mixer/utils'
 
-/** a plausible 4-band EQ, small enough to stay readable */
-const bands = [
-  { key: 'low', label: 'LOW', name: 'Low' },
+/**
+ * A plausible 4-band EQ, small enough to stay readable. It mirrors the shape
+ * of a real console — the outer bands double as shelving and pass filters,
+ * selected through the top end of their Q range — so the UI can be worked on
+ * without a device attached.
+ */
+interface Band {
+  key: string
+  label: string
+  name: string
+  filter?: {
+    property: string
+    label: string
+    type: DeviceEqFilterType
+    shelfLabel: string
+    shelfType: DeviceEqFilterType
+  }
+}
+
+const bands: Band[] = [
+  {
+    key: 'low',
+    label: 'LOW',
+    name: 'Low',
+    filter: {
+      property: 'eqHpfOn',
+      label: 'HPF',
+      type: 'highPass',
+      shelfLabel: 'L.SHELF',
+      shelfType: 'lowShelf',
+    },
+  },
   { key: 'lowMid', label: 'L-MID', name: 'LowMid' },
   { key: 'hiMid', label: 'H-MID', name: 'HiMid' },
-  { key: 'hi', label: 'HIGH', name: 'Hi' },
+  {
+    key: 'hi',
+    label: 'HIGH',
+    name: 'Hi',
+    filter: {
+      property: 'eqLpfOn',
+      label: 'LPF',
+      type: 'lowPass',
+      shelfLabel: 'H.SHELF',
+      shelfType: 'highShelf',
+    },
+  },
 ]
 
 const frequencies = [
@@ -24,17 +65,38 @@ const frequencies = [
 
 const qValues = [10, 5, 2.5, 1.4, 1, 0.7, 0.5, 0.25, 0.1]
 
-function eqBandParameters(band: { name: string }): DeviceParameter[] {
+function qOptions(band: Band) {
+  const numeric = qValues.map((q, index) => ({
+    value: index,
+    label: q.toFixed(q >= 1 ? 1 : 2),
+    number: q,
+  }))
+
+  if (!band.filter) return numeric
+
+  // the filter types sit past the numeric range, as they do on a real console
+  return [
+    ...numeric,
+    {
+      value: qValues.length,
+      label: band.filter.shelfLabel,
+      filter: band.filter.shelfType,
+    },
+    {
+      value: qValues.length + 1,
+      label: band.filter.label,
+      filter: band.filter.type,
+    },
+  ]
+}
+
+function eqBandParameters(band: Band): DeviceParameter[] {
   return [
     {
       key: `eq${band.name}Q`,
       label: 'Q',
       type: 'enum',
-      options: qValues.map((q, index) => ({
-        value: index,
-        label: q.toFixed(q >= 1 ? 1 : 2),
-        number: q,
-      })),
+      options: qOptions(band),
     },
     {
       key: `eq${band.name}F`,
@@ -56,11 +118,39 @@ function eqBandParameters(band: { name: string }): DeviceParameter[] {
       scale: 0.1,
       unit: 'dB',
     },
+    ...(band.filter
+      ? [
+          {
+            key: band.filter.property,
+            label: band.filter.label,
+            type: 'boolean' as const,
+          },
+        ]
+      : []),
   ]
 }
 
 const eqParameters: DeviceParameter[] = [
   { key: 'eqOn', label: 'EQ', type: 'boolean' },
+  {
+    key: 'eqMode',
+    label: 'TYPE',
+    type: 'enum',
+    options: [
+      { value: 0, label: 'I' },
+      { value: 1, label: 'II' },
+    ],
+  },
+  {
+    key: 'att',
+    label: 'ATT',
+    type: 'number',
+    min: -960,
+    max: 120,
+    step: 1,
+    scale: 0.1,
+    unit: 'dB',
+  },
   ...bands.flatMap(eqBandParameters),
 ]
 
@@ -73,7 +163,9 @@ const eqConfiguration: DeviceEqConfiguration = {
     gain: `eq${band.name}G`,
     frequency: `eq${band.name}F`,
     q: `eq${band.name}Q`,
+    on: band.filter?.property,
   })),
+  extraParameters: ['eqMode', 'att'],
 }
 
 export default class DummyDeviceController implements DeviceController {

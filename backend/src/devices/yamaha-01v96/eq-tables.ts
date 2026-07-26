@@ -45,10 +45,10 @@ export const eqQOptions: DeviceEnumParameterOption[] = [
   { value: 38, label: '0.12', number: 0.12 },
   { value: 39, label: '0.11', number: 0.11 },
   { value: 40, label: '0.10', number: 0.1 },
-  { value: 41, label: 'L.SHELF' },
-  { value: 42, label: 'H.SHELF' },
-  { value: 43, label: 'LPF' },
-  { value: 44, label: 'HPF' },
+  { value: 41, label: 'L.SHELF', filter: 'lowShelf' },
+  { value: 42, label: 'H.SHELF', filter: 'highShelf' },
+  { value: 43, label: 'LPF', filter: 'lowPass' },
+  { value: 44, label: 'HPF', filter: 'highPass' },
 ]
 
 export const eqFrequencyOptions: DeviceEnumParameterOption[] = [

@@ -194,22 +194,30 @@ like the other detail controls.
    confirmed in the device TODO, so no hardware round-trip was needed first.
 3. ✅ 01v96 mapping table + `deviceConfig.parameters` / `eq`, including the
    attenuator. Message bytes covered by `test/eq-mapping.test.ts`.
-   **Still to verify against the real console.**
+   Verified against the console on channels 1 and 16.
 4. ✅ `sync-entry` plumbing, backend and frontend.
 5. ✅ EQ tab with plain faders. Verified end to end against the dummy device,
    which now has an EQ of its own.
-6. ⬜ Curve display, drag handles.
+6. ✅ Curve display. The filter math lives in `frontend/src/util/eq-curve.ts`
+   (RBJ biquads) and is unit tested; the band a device reports is translated
+   into filter settings by `getEqBandSettings`. Devices declare the filter a Q
+   value selects through `DeviceEnumParameterOption.filter`, so the frontend
+   never has to guess a filter type from a display label.
+7. ⬜ Draggable band handles on the curve.
+8. ⬜ Rework the HPF/LPF controls (see below).
 
-### Verifying against the console
+### Known rough edge: the HPF/LPF controls
 
-Everything below the wire format is covered by tests, but no message has been
-sent to real hardware yet. With `device: 'yamaha-01v96'` and `logLevel: 'debug'`
-in the local config, open a channel's EQ tab and check that
+Confirmed confusing in use on the console. The low and high band each carry two
+overlapping controls: the Q fader runs off its numeric range into `L.SHELF` /
+`HPF` (and `H.SHELF` / `LPF`), *and* there is a separate HPF/LPF on/off button,
+which is what the `kEQHPFOn` / `kEQLPFOn` parameters map to. Worse, the manual
+notes the LOW and HIGH gain controls "function as filter on/off controls when Q
+is set to HPF or LPF respectively", so a third control overlaps the same state.
 
-- the values in the tab match the console's EQ page after `sync-entry`,
-- moving a fader moves the matching parameter on the console,
-- turning a knob on the console updates the tab,
-- a gain of exactly -18.0dB logs `7f 7f 7e 4c` as its data bytes.
+Ideas to try: make the band's filter type an explicit control (PEAK / SHELF /
+PASS) that drives the Q value, and show the on/off button only when the band is
+in pass mode. Needs the curve first to make the effect legible.
 
 ## Follow-ups (out of scope for the first pass)
 

@@ -30,6 +30,13 @@ export interface DeviceNumberParameter extends DeviceParameterBase {
   unit?: string
 }
 
+export type DeviceEqFilterType =
+  | 'peaking'
+  | 'lowShelf'
+  | 'highShelf'
+  | 'highPass'
+  | 'lowPass'
+
 export interface DeviceEnumParameterOption {
   value: number
   label: string
@@ -39,6 +46,11 @@ export interface DeviceEnumParameterOption {
    * options that are not numeric (a filter type) leave this unset.
    */
   number?: number
+  /**
+   * For the Q of an EQ band: the filter the band becomes at this value.
+   * Bands whose Q is a plain number are peaking filters.
+   */
+  filter?: DeviceEqFilterType
 }
 
 export interface DeviceEnumParameter extends DeviceParameterBase {
