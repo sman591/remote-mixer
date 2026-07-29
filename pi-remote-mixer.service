@@ -1,0 +1,34 @@
+# systemd unit template for the permanent Raspberry Pi install.
+# Installed to /etc/systemd/system/remote-mixer.service by pi-install.sh,
+# which fills in the user and install dir placeholders below.
+
+[Unit]
+Description=remote-mixer
+After=network-online.target sound.target
+Wants=network-online.target
+
+# Never give up on restarting (see RestartSec below). This key only takes
+# effect in [Unit]; systemd ignores it in [Service].
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+User=@USER@
+Group=@USER@
+WorkingDirectory=@INSTALL_DIR@
+
+# Written by pi-deploy.sh on every sync. Carries PATH (node lives under nvm,
+# which is not on a unit's default PATH) and NODE_ENV.
+EnvironmentFile=@INSTALL_DIR@/.env.systemd
+ExecStart=/usr/bin/env node @INSTALL_DIR@/backend/dist/index.js
+
+# The 01v96 device controller throws at startup when the console is not
+# connected, so keep retrying forever: booting the Pi before powering on the
+# desk has to end up working on its own.
+Restart=always
+RestartSec=10
+
+SyslogIdentifier=remote-mixer
+
+[Install]
+WantedBy=multi-user.target

@@ -77,6 +77,48 @@ Start in production mode:
 > yarn start
 ```
 
+### Raspberry Pi deployment
+
+For a Pi that travels to gigs and has to come up on its own, `pi-install.sh` sets up a permanent install that runs as a systemd service, separate from the checkout you develop in:
+
+| Path | |
+| --- | --- |
+| `~/remote-mixer` | the dev checkout — `yarn dev` on ports 8000/8001, unchanged |
+| `~/remote-mixer-prod` | the permanent install the service runs from, on port 8080 |
+
+Run the setup once:
+
+```shellscript
+> ./pi-install.sh
+```
+
+It creates the install dir with its own `config/remote-mixer-config.local.js`, installs and enables `remote-mixer.service`, allows your user to start/stop/restart that one service without a password, and adds an nftables rule redirecting port 80 to the app so phones can use a bare hostname.
+
+Then deploy the current working tree — including uncommitted changes, so a fix during a show needs no commit:
+
+```shellscript
+> yarn deploy
+```
+
+That builds in the dev checkout, stops the service, rsyncs everything except the install's own config into `~/remote-mixer-prod`, starts the service again and waits for it to answer. A failed build aborts before the running service is touched. Use `yarn deploy --skip-build` to re-sync without rebuilding.
+
+Day to day:
+
+```shellscript
+> journalctl -u remote-mixer -f      # logs
+> sudo systemctl restart remote-mixer
+> cat ~/remote-mixer-prod/.deploy-info   # what is actually running
+```
+
+The mixer is then at `http://<hostname>.local` (port 80 redirects to 8080).
+
+Notes:
+
+- Port and device for the permanent install live in `~/remote-mixer-prod/config/remote-mixer-config.local.js`. `yarn deploy` never overwrites it — edit it there and restart the service.
+- The 01v96 controller throws at startup if the console is not connected, so the service restarts every 10 seconds until it appears. Booting the Pi before powering on the desk is fine; it will come up within about 10 seconds of the desk being switched on.
+- `yarn dev` and the service can run at the same time, but both open the console's MIDI port. Fine for a quick check, not something to do during a show.
+- `./pi-install.sh --uninstall` removes the service, the sudoers rule and the port 80 redirect.
+
 ## Configuration
 
 Edit the `config/remote-mixer-config.js` file. Instructions on how to configure each compatible mixing console are usually contained in the corresponding README in `backend/src/devices`.
