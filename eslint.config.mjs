@@ -50,10 +50,11 @@ export default tseslint.config(
         'error',
         { functions: false },
       ],
-      // shared assertions live in helpers named expect*
+      // shared assertions live in helpers named expect*, and the testing
+      // library queries throw when they find nothing
       'jest/expect-expect': [
         'warn',
-        { assertFunctionNames: ['expect', 'expect*'] },
+        { assertFunctionNames: ['expect', 'expect*', 'screen.getBy*'] },
       ],
       'import/namespace': 'off',
       'import/no-duplicates': ['error'],
