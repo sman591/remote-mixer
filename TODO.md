@@ -47,6 +47,5 @@ have landed. What is left:
 
 ## Tech
 
-- Add heartbeat to improve connection loss scenario
 - [CLAUDE.md](CLAUDE.md) claims tests only exist in `shared/utils/test`, which stopped
   being true once the EQ tests landed under `backend/` and `frontend/`.

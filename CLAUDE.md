@@ -55,6 +55,7 @@ Message flow:
 - **Client change** → `sendApiMessage` applies it locally immediately (optimistic, keeps faders responsive) → backend `handleApiMessage` → `deviceController.change()` **and** broadcast to all *other* sockets.
 - **Mixer change** → device controller calls its listener → backend applies to state → broadcast to all sockets.
 - On connect the backend sends a full `sync` (state + device config + mode); it also broadcasts a `heartbeat` every 2s, and the client reconnects if none arrives for 5s.
+- Both ends assume the other can vanish without closing the socket. The backend pings on the same 2s interval and terminates any client that missed the previous pong; the client treats *any* message as a sign of life, starts its timeout at connect (so a socket that never gets a first heartbeat still fails over), and detaches a socket it has given up on — a `close` arriving minutes later must not queue a second reconnect on top of the live one.
 
 ### Device controllers are plugins
 
