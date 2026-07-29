@@ -1,5 +1,6 @@
 import { DeviceEnumParameter } from '@remote-mixer/types'
 
+import { expectValidEqConfiguration } from '../../test/eq-contract'
 import { deviceConfig } from '../device-config'
 import { eqConfiguration, eqMappingByProperty, eqParameters } from '../eq'
 
@@ -14,20 +15,9 @@ function enumOptionValues(key: string) {
 }
 
 describe('EQ configuration', () => {
-  it('describes every property it references', () => {
-    const referenced = [
-      eqConfiguration.on,
-      ...(eqConfiguration.extraParameters ?? []),
-      ...eqConfiguration.bands.flatMap(band => [
-        band.gain,
-        band.frequency,
-        band.q,
-        band.on,
-      ]),
-    ].filter(key => key !== undefined)
-
-    for (const key of referenced) {
-      expect(parameter(key)).toBeDefined()
+  it('holds up as an EQ configuration', () => {
+    for (const category of deviceConfig.categories) {
+      expectValidEqConfiguration(category)
     }
   })
 

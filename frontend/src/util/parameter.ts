@@ -55,6 +55,11 @@ export function getEnumParameterIndex(
   return index === -1 ? 0 : index
 }
 
+/**
+ * Unlike `getEnumParameterIndex`, which falls back to the first option so a
+ * fader always has a position, this keeps "not reported yet" distinguishable
+ * from "reported as the first option".
+ */
 function enumOption(
   category: DeviceConfigurationCategory,
   key: string,
@@ -62,7 +67,11 @@ function enumOption(
 ): DeviceEnumParameterOption | undefined {
   const parameter = getParameter(category, key)
   if (parameter?.type !== 'enum') return undefined
-  return parameter.options[getEnumParameterIndex(parameter, state[key])]
+
+  const value = state[key]
+  if (typeof value !== 'number') return undefined
+
+  return parameter.options.find(option => option.value === value)
 }
 
 /** Q the pass and shelving filters are drawn with, they have no Q of their own */

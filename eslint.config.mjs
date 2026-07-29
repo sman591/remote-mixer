@@ -50,6 +50,11 @@ export default tseslint.config(
         'error',
         { functions: false },
       ],
+      // shared assertions live in helpers named expect*
+      'jest/expect-expect': [
+        'warn',
+        { assertFunctionNames: ['expect', 'expect*'] },
+      ],
       'import/namespace': 'off',
       'import/no-duplicates': ['error'],
       'import/no-extraneous-dependencies': ['error'],
