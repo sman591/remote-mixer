@@ -31,7 +31,9 @@ Runs the backend (port 8000) plus the webpack dev server (port 8001, opens a bro
 | Run production build | `yarn start` (port 8000) |
 | Run a script in one workspace | `yarn backend <script>` / `yarn frontend <script>` |
 
-Note `yarn build` runs `yarn clean` first, which wipes `dist` and the Linaria/eslint caches — a full rebuild takes a while. Tests currently only exist in `shared/utils/test`.
+Note `yarn build` runs `yarn clean` first, which wipes `dist` and the Linaria/eslint caches — a full rebuild takes a while.
+
+Tests live in a `test` directory next to the code they cover — `shared/utils/test`, `backend/src/devices/test`, `backend/src/devices/yamaha-01v96/test`, `frontend/src/util/test`, `frontend/src/controls/test`, `frontend/src/controls/entry-dialog/test`. One Jest config at the root runs all of them; put new tests in the sibling `test` directory rather than adding a new pattern.
 
 Runtime config sets `device`, `mode`, `httpPort`, `logLevel`; defaults live in [backend/src/services/config.ts](backend/src/services/config.ts). Two files layer, shallow-merged: the tracked `config/remote-mixer-config.js`, then the gitignored `config/remote-mixer-config.local.js` for machine-specific settings. Never put a device IP or local override in the tracked file. `device: 'dummy'` emits random changes and meters, so the whole stack runs without hardware.
 

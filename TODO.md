@@ -15,6 +15,9 @@ have landed. What is left:
   button, and the gain control doubling as an on/off in pass mode). Idea: an explicit
   PEAK / SHELF / PASS control that drives Q, with the on/off button shown only in pass
   mode.
+- Group the band faders visually. The three faders of each band (F / G / Q) sit so close
+  to the neighbouring band's that it is hard to tell at a glance which band a given
+  fader belongs to — needs spacing, a per-band container, or a band label.
 
 ## Roadmap
 
@@ -30,22 +33,10 @@ have landed. What is left:
 - Dynamics — should reuse the generic parameter machinery the EQ work built, so no
   device-specific frontend code.
 
-## Bugs
-
-- **01v96 EQ does not render on the Raspberry Pi** — confirmed, and not an EQ bug: the
-  Pi serves a **stale frontend bundle**. Its backend is current (the `sync` from
-  `10.0.0.104:8000` reports `mode: full` and carries `eq` plus all 17 `parameters` on
-  every category), but the `main.js` it serves contains no EQ code at all — no
-  `sync-entry`, no `lowShelf` / `highPass` / `peaking` — while still containing
-  `bypassIemMode`. So `frontend/dist` was built somewhere between [f8bb91e] (IEM mode)
-  and [06bfa83] (the first EQ commit), and `backend/dist` was rebuilt since.
-  Fix is to rebuild the frontend on the Pi. Still open: *why* the two halves diverged —
-  `yarn build` runs both under `run-p`, so a frontend build that failed (webpack +
-  Linaria on Pi memory is the obvious suspect) would leave exactly this state, with the
-  backend updated and the service restarted over an old `dist`. Worth confirming on the
-  box, and worth making the failure loud if that is what happened.
-
 ## Tech
 
-- [CLAUDE.md](CLAUDE.md) claims tests only exist in `shared/utils/test`, which stopped
-  being true once the EQ tests landed under `backend/` and `frontend/`.
+- Make a failed production build loud. Left over from the Pi's stale-bundle bug (EQ not
+  rendering, now fixed): `yarn build` runs the frontend and backend under `run-p`, so a
+  frontend build that dies — webpack + Linaria on Pi memory being the suspect — leaves
+  the backend updated and the service restarted over an old `frontend/dist`, with
+  nothing to signal it.
