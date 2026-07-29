@@ -1,0 +1,15 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -n --rawfile todo \"${CLAUDE_PROJECT_DIR:-.}/TODO.md\" '{hookSpecificOutput:{hookEventName:\"SessionStart\",additionalContext:(\"Project backlog — TODO.md:\\n\\n\"+$todo)}}' 2>/dev/null || true",
+            "statusMessage": "Loading TODO.md"
+          }
+        ]
+      }
+    ]
+  }
+}

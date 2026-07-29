@@ -6,6 +6,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Web-based remote control for mixing consoles. A Node backend talks to a physical mixer (MIDI/OSC) and mirrors its state over WebSocket to any number of browser clients.
 
+Read [TODO.md](TODO.md) at the start of a session — it is the working backlog, and it links out to any plan document for work that is currently in progress (today, [EQ-PLAN.md](EQ-PLAN.md)). Keep both current as work lands: tick off steps, and move anything a plan defers into the backlog rather than leaving it only in the plan.
+
 ## Commands
 
 Yarn 4 workspaces monorepo — run everything from the repo root.

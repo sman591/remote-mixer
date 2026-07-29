@@ -1,7 +1,7 @@
 # EQ implementation plan
 
-Working document for the `feat/eq` branch: adding channel EQ control, generically in
-the protocol and specifically for the Yamaha 01v96 (4-band parametric).
+Working document for adding channel EQ control, generically in the protocol and
+specifically for the Yamaha 01v96 (4-band parametric). Landing directly on `main`.
 
 ## Goal
 
@@ -26,15 +26,15 @@ Everything needed for the 01v96 is already in the repo:
 
 ### Parameter ranges (`kInputEQ`, identical for AUX/Bus/Stereo)
 
-| Property        | Min | Max        | Default          | Meaning              |
-| --------------- | --- | ---------- | ---------------- | -------------------- |
-| `kEQMode`       | 0   | 1          | 0                | Type I / Type II     |
-| `kEQ{band}Q`    | 0   | 40/43/44   | 41/23/23/42      | index into Q table   |
-| `kEQ{band}F`    | 5   | 124        | 36/72/96/112     | index into F table   |
-| `kEQ{band}G`    | -180| 180        | 0                | dB × 10              |
-| `kEQHPFOn`      | 0   | 1          | 1                | LOW band filter      |
-| `kEQLPFOn`      | 0   | 1          | 1                | HIGH band filter     |
-| `kEQOn`         | 0   | 1          | 1                | EQ on/off            |
+| Property     | Min  | Max      | Default      | Meaning            |
+| ------------ | ---- | -------- | ------------ | ------------------ |
+| `kEQMode`    | 0    | 1        | 0            | Type I / Type II   |
+| `kEQ{band}Q` | 0    | 40/43/44 | 41/23/23/42  | index into Q table |
+| `kEQ{band}F` | 5    | 124      | 36/72/96/112 | index into F table |
+| `kEQ{band}G` | -180 | 180      | 0            | dB × 10            |
+| `kEQHPFOn`   | 0    | 1        | 1            | LOW band filter    |
+| `kEQLPFOn`   | 0    | 1        | 1            | HIGH band filter   |
+| `kEQOn`      | 0    | 1        | 1            | EQ on/off          |
 
 Bands are `Low`, `LowMid`, `HiMid`, `Hi`.
 
@@ -77,7 +77,11 @@ export type DeviceParameter =
       key: string
       label: string
       type: 'enum'
-      options: { value: number; label: string; /** for curve math */ number?: number }[]
+      options: {
+        value: number
+        label: string
+        /** for curve math */ number?: number
+      }[]
     }
 ```
 
@@ -89,9 +93,9 @@ So the frontend can draw a real EQ rather than a wall of sliders:
 
 ```ts
 export interface DeviceEqBand {
-  key: string        // 'low'
-  label: string      // 'LOW'
-  gain: string       // property key, e.g. 'eqLowG'
+  key: string // 'low'
+  label: string // 'LOW'
+  gain: string // property key, e.g. 'eqLowG'
   frequency: string
   q: string
   /** filter enable for shelf/pass bands, e.g. 'eqHpfOn' */
@@ -100,9 +104,9 @@ export interface DeviceEqBand {
 
 export interface DeviceEqConfiguration {
   label: string
-  on?: string                    // 'eqOn'
+  on?: string // 'eqOn'
   bands: DeviceEqBand[]
-  extraParameters?: string[]     // e.g. ['eqMode', 'att']
+  extraParameters?: string[] // e.g. ['eqMode', 'att']
 }
 ```
 
@@ -142,7 +146,10 @@ the aux-send one, driven by a category → element-name table:
 
 ```ts
 const eqTypePrefixByCategory = {
-  ch: 'kInputEQ', aux: 'kAUXEQ', bus: 'kBusEQ', sum: 'kStereoEQ',
+  ch: 'kInputEQ',
+  aux: 'kAUXEQ',
+  bus: 'kBusEQ',
+  sum: 'kStereoEQ',
 }
 ```
 
@@ -210,7 +217,7 @@ like the other detail controls.
 
 Confirmed confusing in use on the console. The low and high band each carry two
 overlapping controls: the Q fader runs off its numeric range into `L.SHELF` /
-`HPF` (and `H.SHELF` / `LPF`), *and* there is a separate HPF/LPF on/off button,
+`HPF` (and `H.SHELF` / `LPF`), _and_ there is a separate HPF/LPF on/off button,
 which is what the `kEQHPFOn` / `kEQLPFOn` parameters map to. Worse, the manual
 notes the LOW and HIGH gain controls "function as filter on/off controls when Q
 is set to HPF or LPF respectively", so a third control overlaps the same state.
@@ -221,13 +228,5 @@ in pass mode. Needs the curve first to make the effect legible.
 
 ## Follow-ups (out of scope for the first pass)
 
-- **EQ link groups** — `kInputGroup/kInGroupEQ{1-4}` and
-  `kSceneInputGroup/kInEQGroup{1-4}` follow the exact pattern the Fader/Mute groups
-  already use in [mapping.ts](backend/src/devices/yamaha-01v96/mapping.ts) (indices 1–4
-  only). Adding `EQ` there plus a branch in `refreshDependentChannels` keeps linked and
-  paired channels consistent in the UI.
-- **Aux-send mapping bug** — the `outgoing` guard in
-  [mapping.ts](backend/src/devices/yamaha-01v96/mapping.ts) uses `&&` where it means
-  `||`. Harmless today only because the byte lookup then fails; worth fixing as more
-  property namespaces appear.
-- Dynamics, using the same generic parameter machinery.
+EQ link groups, dynamics, and the aux-send mapping bug this work turned up all live in
+the backlog now — see [TODO.md](TODO.md).
